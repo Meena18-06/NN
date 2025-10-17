@@ -1,0 +1,475 @@
+<!-- 
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, OCaml, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SPA — Phase 1 Project (V. Meena)</title>
+<style>
+  /* --- Reset & base --- */
+  :root{
+    --bg:#f6f7fb; --card:#fff; --accent:#2563eb; --muted:#6b7280; --danger:#ef4444;
+  }
+  *{box-sizing:border-box}
+  html,body,#app{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  body{background:linear-gradient(180deg,#f3f4f6, #ffffff); color:#111827;}
+  .container{max-width:1100px;margin:24px auto;padding:16px;}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(45deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+  nav{display:flex;gap:8px;align-items:center}
+  .navlink{padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--muted);font-weight:600;cursor:pointer}
+  .navlink.active{background:rgba(37,99,235,0.12);color:var(--accent)}
+  .hamburger{display:none;border:0;background:transparent;font-size:20px;cursor:pointer}
+  /* --- layout --- */
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:18px}
+  .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 4px 12px rgba(15,23,42,0.04);}
+  h1{font-size:20px;margin:0 0 8px}
+  .muted{color:var(--muted);font-size:14px}
+  /* project view */
+  .meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .meta .pill{background:#f3f4f6;padding:6px 10px;border-radius:999px;font-weight:600;color:#374151}
+  /* tasks */
+  .task{display:flex;align-items:center;gap:8px;padding:10px;border-radius:8px;border:1px dashed #eef2ff;margin-bottom:8px}
+  .task .title{flex:1}
+  .btn{padding:8px 10px;border-radius:8px;border:0;background:var(--accent);color:white;font-weight:600;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(37,99,235,0.12)}
+  .btn.danger{background:var(--danger)}
+  .small{font-size:13px;padding:6px 8px}
+  form.row{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+  input[type="text"], textarea, select{padding:8px;border-radius:8px;border:1px solid #e6e9ef;width:100%;font-size:14px}
+  textarea{min-height:70px;resize:vertical}
+  .filters{display:flex;gap:8px;margin-bottom:12px}
+  .statbox{display:flex;gap:10px;flex-wrap:wrap}
+  .stat{background:#F9FAFB;padding:10px;border-radius:10px;min-width:140px}
+  footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+  /* responsive */
+  @media (max-width:880px){
+    .grid{grid-template-columns:1fr; }
+    .hamburger{display:block}
+    nav{display:none}
+    nav.open{display:flex;position:absolute;left:16px;right:16px;top:74px;background:var(--card);padding:12px;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,0.08);flex-direction:column}
+  }
+  /* small helpers */
+  .muted-sm{color:var(--muted);font-size:13px}
+  .loading{opacity:0.6}
+  .empty{padding:18px;border-radius:8px;background:#fff8f8;border:1px solid #ffecec;color:#9b1c1c}
+</style>
+</head>
+<body>
+<div id="app" class="container">
+  <header>
+    <div class="brand">
+      <div class="logo">SPA</div>
+      <div>
+        <div style="font-weight:700">Single Page Application</div>
+        <div class="muted" style="font-size:13px">Phase 1 project — V. Meena</div>
+      </div>
+    </div>
+
+    <nav id="mainNav" aria-label="Main navigation">
+      <a class="navlink" data-route="#/dashboard">Dashboard</a>
+      <a class="navlink" data-route="#/project">Project</a>
+      <a class="navlink" data-route="#/tasks">Tasks</a>
+      <a class="navlink" data-route="#/profile">Profile</a>
+    </nav>
+
+    <button class="hamburger" id="hambBtn" aria-label="Open menu">☰</button>
+  </header>
+
+  <main class="grid">
+    <section id="view" class="card" aria-live="polite">
+      <!-- dynamic view content -->
+    </section>
+
+    <aside class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-weight:700">Quick Actions</div>
+          <div class="muted-sm">Create tasks or view stats</div>
+        </div>
+        <div style="text-align:right">
+          <div class="muted-sm">Date</div>
+          <div style="font-weight:700" id="today"></div>
+        </div>
+      </div>
+
+      <hr style="margin:12px 0;border:none;border-top:1px solid #f3f4f6" />
+
+      <div id="quickAdd">
+        <form id="quickAddForm" class="row" onsubmit="return false;">
+          <input id="quickTitle" type="text" placeholder="New task title" required />
+          <button id="qaBtn" class="btn small">Add</button>
+        </form>
+      </div>
+
+      <div style="margin-top:10px">
+        <div class="statbox">
+          <div class="stat">
+            <div class="muted-sm">Total Tasks</div>
+            <div id="statTotal" style="font-weight:700">0</div>
+          </div>
+          <div class="stat">
+            <div class="muted-sm">Completed</div>
+            <div id="statDone" style="font-weight:700">0</div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div>COLLEGE: P.S.R.R College of Engineering</div>
+        <div class="muted-sm">ROLL NO: 23CSE36 • DATE: 19.09.2025</div>
+      </footer>
+    </aside>
+  </main>
+</div>
+
+<script>
+/*
+  SPA single-file implementation:
+  - Hash routing (#/dashboard, #/project, #/tasks, #/profile)
+  - Uses localStorage for tasks
+  - Maps content extracted from uploaded PDF (metadata & problem statement)
+  - Citation: content taken from user's uploaded PDF. (see app UI)
+    Source: uploaded file.
+*/
+
+const PDF_PROJECT = {
+  collegeCode: '9520',
+  collegeName: 'P.S.R.R College of Engineering',
+  department: 'CSE',
+  studentNmId: '22bb335c3e3507b94ad4bc3cf5fa7959',
+  rollNo: '23CSE36',
+  date: '19.09.2025',
+  submittedBy: { name: 'V.Meena', mobile: '8056380985' },
+  title: 'Single Page Application (SPA)',
+  problemStatement: `Modern web users expect fast, seamless, and interactive experiences similar to desktop applications. Traditional multi-page websites, which reload the entire page on every user interaction, often lead to slower performance, increased bandwidth consumption, and a less fluid user experience.`,
+  goals: [
+    'Deliver a responsive and fast user interface with minimal full page reloads.',
+    'Enable dynamic content updates based on user interaction.',
+    'Support navigation between different views or sections within the app without disrupting the user experience.',
+    'Ensure maintainable and scalable code architecture.',
+    'Handle browser history and deep linking for better usability and SEO.'
+  ],
+  mvp: [
+    'Client-side routing',
+    'Dynamic content loading',
+    'Responsive UI',
+    'State management',
+    'Error handling and feedback',
+  ]
+};
+
+// --- small utilities ---
+const $ = sel => document.querySelector(sel);
+const qsAll = sel => Array.from(document.querySelectorAll(sel));
+const saveTasks = tasks => localStorage.setItem('spa.tasks.v1', JSON.stringify(tasks));
+const loadTasks = () => {
+  try {
+    return JSON.parse(localStorage.getItem('spa.tasks.v1') || '[]');
+  } catch(e){ return [] }
+};
+
+function uid(prefix='id'){
+  return prefix + '-' + Math.random().toString(36).slice(2,9);
+}
+
+// --- Routing ---
+const ROUTES = {
+  '/dashboard': renderDashboard,
+  '/project': renderProject,
+  '/tasks': renderTasks,
+  '/profile': renderProfile
+};
+
+function getRoute(){
+  const hash = location.hash || '#/dashboard';
+  const path = hash.replace('#','').split('?')[0];
+  return path;
+}
+
+function navigate(path){
+  location.hash = path;
+}
+
+// Highlight active nav
+function updateNav(){
+  qsAll('.navlink').forEach(a=>{
+    a.classList.toggle('active', a.dataset.route === location.hash);
+  });
+}
+
+// --- Views ---
+function renderDashboard(){
+  const tasks = loadTasks();
+  const total = tasks.length;
+  const done = tasks.filter(t => t.done).length;
+
+  $('#view').innerHTML = `
+    <h1>Dashboard</h1>
+    <div class="muted">Welcome — quick summary</div>
+
+    <div style="margin-top:12px" class="statbox">
+      <div class="stat"><div class="muted-sm">Total Tasks</div><div style="font-weight:700">${total}</div></div>
+      <div class="stat"><div class="muted-sm">Completed</div><div style="font-weight:700">${done}</div></div>
+      <div class="stat"><div class="muted-sm">Project</div><div style="font-weight:700">${PDF_PROJECT.title}</div></div>
+    </div>
+
+    <hr style="margin:12px 0;border:none;border-top:1px solid #f3f4f6" />
+
+    <div>
+      <h2 style="font-size:16px;margin:0 0 8px">Recent Activity</h2>
+      <div class="muted-sm">You can add tasks from the right-hand quick add or open Tasks view for full CRUD features.</div>
+      <div style="margin-top:12px" id="recentList">
+        ${tasks.slice(0,5).map(t => `<div class="task"><div class="title">${escapeHtml(t.title)}</div><div class="muted-sm">${t.done?'✅':'•'}</div></div>`).join('') || '<div class="empty">No recent tasks</div>'}
+      </div>
+    </div>
+  `;
+  updateStats(total, done);
+}
+
+function renderProject(){
+  // Use the PDF content inserted above
+  $('#view').innerHTML = `
+    <h1>Project: ${escapeHtml(PDF_PROJECT.title)}</h1>
+    <div class="muted">Phase 1 submission details (extracted from your uploaded file). :contentReference[oaicite:1]{index=1}</div>
+
+    <div class="meta" style="margin-top:12px">
+      <div class="pill">${escapeHtml(PDF_PROJECT.collegeName)}</div>
+      <div class="pill">Dept: ${escapeHtml(PDF_PROJECT.department)}</div>
+      <div class="pill">Roll: ${escapeHtml(PDF_PROJECT.rollNo)}</div>
+      <div class="pill">Date: ${escapeHtml(PDF_PROJECT.date)}</div>
+    </div>
+
+    <section style="margin-top:12px">
+      <h2 style="font-size:16px;margin-bottom:6px">Problem Statement</h2>
+      <p class="muted-sm">${escapeHtml(PDF_PROJECT.problemStatement)}</p>
+
+      <h3 style="font-size:15px;margin-top:10px">Project Goals</h3>
+      <ul>
+        ${PDF_PROJECT.goals.map(g=>`<li>${escapeHtml(g)}</li>`).join('')}
+      </ul>
+
+      <h3 style="font-size:15px;margin-top:10px">MVP Features</h3>
+      <ul>
+        ${PDF_PROJECT.mvp.map(m=>`<li>${escapeHtml(m)}</li>`).join('')}
+      </ul>
+    </section>
+
+    <hr style="margin:12px 0;border:none;border-top:1px solid #f3f4f6" />
+
+    <div>
+      <h3 style="font-size:15px;margin:0 0 6px">Submitted By</h3>
+      <div class="muted-sm">${escapeHtml(PDF_PROJECT.submittedBy.name)} • ${escapeHtml(PDF_PROJECT.submittedBy.mobile)}</div>
+    </div>
+  `;
+}
+
+function renderTasks(){
+  const tasks = loadTasks();
+  const frag = tasks.length ? tasks.map(t => taskHtml(t)).join('') : '<div class="empty">No tasks yet. Add one from the right.</div>';
+
+  $('#view').innerHTML = `
+    <h1>Tasks</h1>
+    <div class="muted">Add, edit, delete tasks. Stored locally in your browser (localStorage).</div>
+
+    <form id="taskForm" style="margin-top:12px" onsubmit="return false;">
+      <div class="row">
+        <input id="taskTitle" type="text" placeholder="Task title (required)" required />
+        <select id="taskStatus" style="width:140px"><option value="pending">Pending</option><option value="done">Done</option></select>
+      </div>
+      <textarea id="taskDesc" placeholder="Description (optional)"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="taskSave" class="btn">Create Task</button>
+        <button id="taskClear" class="btn ghost" type="button">Clear</button>
+      </div>
+    </form>
+
+    <hr style="margin:12px 0;border:none;border-top:1px solid #f3f4f6" />
+
+    <div id="tasksList">
+      ${frag}
+    </div>
+  `;
+
+  // attach handlers
+  $('#taskSave').addEventListener('click', onCreateTask);
+  $('#taskClear').addEventListener('click', ()=>{ $('#taskTitle').value=''; $('#taskDesc').value=''; $('#taskStatus').value='pending'; });
+  document.querySelectorAll('.task-toggle').forEach(btn => btn.addEventListener('click', onToggleTask));
+  document.querySelectorAll('.task-edit').forEach(btn => btn.addEventListener('click', onEditTask));
+  document.querySelectorAll('.task-delete').forEach(btn => btn.addEventListener('click', onDeleteTask));
+}
+
+function renderProfile(){
+  const p = PDF_PROJECT.submittedBy;
+  $('#view').innerHTML = `
+    <h1>Profile</h1>
+    <div class="muted">Student & contact information (from uploaded project file)</div>
+
+    <div style="margin-top:12px">
+      <div><strong>Name:</strong> ${escapeHtml(p.name)}</div>
+      <div class="muted-sm">Mobile: ${escapeHtml(p.mobile)}</div>
+      <div class="muted-sm">NM-ID: ${escapeHtml(PDF_PROJECT.studentNmId)}</div>
+      <div style="margin-top:10px;"><strong>College:</strong> ${escapeHtml(PDF_PROJECT.collegeName)} (${escapeHtml(PDF_PROJECT.collegeCode)})</div>
+    </div>
+  `;
+}
+
+// --- Task helpers ---
+function taskHtml(t){
+  return `
+  <div class="task" data-id="${t.id}">
+    <input type="checkbox" ${t.done?'checked':''} class="task-toggle" title="toggle complete" />
+    <div class="title">
+      <div style="font-weight:700">${escapeHtml(t.title)}</div>
+      <div class="muted-sm">${escapeHtml(t.description || '')}</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="btn small task-edit">Edit</button>
+      <button class="btn small task-delete" style="background:transparent;color:#ef4444;border:1px solid rgba(239,68,68,0.12)">Delete</button>
+    </div>
+  </div>`;
+}
+
+function onCreateTask(){
+  const title = $('#taskTitle').value.trim();
+  const desc = $('#taskDesc').value.trim();
+  const status = $('#taskStatus').value;
+  if(!title){ alert('Please enter a title'); return; }
+  const tasks = loadTasks();
+  const newTask = { id:uid('t'), title, description: desc, done: status==='done', created: Date.now() };
+  tasks.unshift(newTask);
+  saveTasks(tasks);
+  renderTasks();
+  renderRoute(); // re-render other view data if needed
+  updateStats(tasks.length, tasks.filter(t=>t.done).length);
+}
+
+function onToggleTask(e){
+  const el = e.currentTarget.closest('.task');
+  const id = el.dataset.id;
+  const tasks = loadTasks();
+  const t = tasks.find(x=>x.id===id);
+  if(!t) return;
+  t.done = !t.done;
+  saveTasks(tasks);
+  renderTasks();
+  updateStats(tasks.length, tasks.filter(t=>t.done).length);
+}
+
+function onEditTask(e){
+  const el = e.currentTarget.closest('.task');
+  const id = el.dataset.id;
+  const tasks = loadTasks();
+  const t = tasks.find(x=>x.id===id);
+  if(!t) return;
+  // quick inline edit modal (simple)
+  const newTitle = prompt('Edit title', t.title);
+  if(newTitle===null) return;
+  t.title = newTitle.trim() || t.title;
+  const newDesc = prompt('Edit description', t.description || '');
+  if(newDesc!==null) t.description = newDesc.trim();
+  saveTasks(tasks);
+  renderTasks();
+  updateStats(tasks.length, tasks.filter(t=>t.done).length);
+}
+
+function onDeleteTask(e){
+  const el = e.currentTarget.closest('.task');
+  const id = el.dataset.id;
+  if(!confirm('Delete this task?')) return;
+  let tasks = loadTasks();
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks(tasks);
+  renderTasks();
+  updateStats(tasks.length, tasks.filter(t=>t.done).length);
+}
+
+// quick add from aside
+$('#qaBtn')?.addEventListener?.('click', ()=>{
+  const v = $('#quickTitle').value.trim();
+  if(!v) { alert('Enter a short title'); return; }
+  const tasks = loadTasks();
+  tasks.unshift({id:uid('t'), title:v, description:'', done:false, created:Date.now()});
+  saveTasks(tasks);
+  $('#quickTitle').value='';
+  if(getRoute()==='/tasks') renderTasks();
+  else renderDashboard();
+  updateStats(tasks.length, tasks.filter(t=>t.done).length);
+});
+
+// Update aside stats
+function updateStats(total, done){
+  $('#statTotal').textContent = total;
+  $('#statDone').textContent = done;
+}
+
+// escape to avoid HTML injection in local content
+function escapeHtml(s=''){
+  return String(s).replace(/[&<>"']/g, (m)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// --- app init & router wiring ---
+function renderRoute(){
+  const path = getRoute();
+  updateNav();
+  const renderer = ROUTES[path] || ROUTES['/dashboard'];
+  renderer();
+}
+
+window.addEventListener('hashchange', renderRoute);
+window.addEventListener('popstate', renderRoute);
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  // set date
+  const d = new Date();
+  $('#today').textContent = d.toLocaleDateString();
+  // nav links
+  qsAll('.navlink').forEach(a=>{
+    a.addEventListener('click', (ev)=>{
+      ev.preventDefault();
+      const route = a.dataset.route;
+      navigate(route);
+      // close mobile nav if open
+      document.getElementById('mainNav')?.classList.remove('open');
+    });
+  });
+  // hamburger mobile
+  const hb = document.getElementById('hambBtn');
+  hb.addEventListener('click', ()=> {
+    document.getElementById('mainNav').classList.toggle('open');
+  });
+
+  // initial render
+  renderRoute();
+
+  // populate initial sample tasks if empty
+  if(!localStorage.getItem('spa.tasks.v1')){
+    const sample = [
+      { id: uid('t'), title: 'Read project brief', description:'Review Phase 1 PDF', done:true, created:Date.now()-86400000 },
+      { id: uid('t'), title: 'Create SPA skeleton', description:'Build header/nav/views', done:false, created:Date.now()-3600000 }
+    ];
+    saveTasks(sample);
+  }
+
+  // apply stats
+  const tasks = loadTasks();
+  updateStats(tasks.length, tasks.filter(t=>t.done).length);
+});
+
+// Small helpers for event delegation (used on renderTasks)
+document.addEventListener('click', (ev)=>{
+  if(ev.target.matches('.task-toggle')) return; // handled in renderTasks wiring
+  if(ev.target.matches('.task-edit')) return;
+});
+
+</script>
+</body>
+</html>
